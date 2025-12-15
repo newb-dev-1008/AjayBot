@@ -35,31 +35,31 @@ async def verify_webhook(request: Request):
 
     return PlainTextResponse("Forbidden", status_code=403)
 
-@app.post("/webhook")
-async def webhook(request: Request):
-    data = await request.json()
-
-    try:
-        entry = data["entry"][0]
-        change = entry["changes"][0]
-        value = change["value"]
-
-        messages = value.get("messages")
-        if not messages:
-            return {"status": "ok"}
-
-        message = messages[0]
-        from_number = message["from"]
-        text = message["text"]["body"]
-
-        reply_text = generate_ajay_reply(text)
-
-        send_message(from_number, reply_text)
-
-    except Exception as e:
-        print("Webhook error:", e)
-
-    return {"status": "ok"}
+# @app.post("/webhook")
+# async def webhook(request: Request):
+#     data = await request.json()
+# 
+#     try:
+#         entry = data["entry"][0]
+#         change = entry["changes"][0]
+#         value = change["value"]
+# 
+#         messages = value.get("messages")
+#         if not messages:
+#             return {"status": "ok"}
+# 
+#         message = messages[0]
+#         from_number = message["from"]
+#         text = message["text"]["body"]
+# 
+#         reply_text = generate_ajay_reply(text)
+# 
+#         send_message(from_number, reply_text)
+# 
+#     except Exception as e:
+#         print("Webhook error:", e)
+# 
+#     return {"status": "ok"}
 
 def generate_ajay_reply(user_text: str) -> str:
     return (
@@ -83,3 +83,25 @@ def send_message(to, text):
 
     r = requests.post(WHATSAPP_URL, json=payload, headers=headers)
     print("Sent:", r.status_code, r.text)
+
+@app.post("/webhook")
+async def handle_message(request: Request):
+    data = await request.json()
+
+    try:
+        entry = data["entry"][0]
+        change = entry["changes"][0]["value"]
+        messages = change.get("messages")
+
+        if messages:
+            from_number = messages[0]["from"]
+
+            send_message(
+                to=from_number,
+                text="Tum khud ek gift ho. Ajay hoon main — officially WhatsApp pe"
+            )
+
+    except Exception as e:
+        print("Webhook error:", e)
+
+    return {"status": "ok"}
