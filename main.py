@@ -97,8 +97,8 @@ async def handle_message(request: Request):
             from_number = messages[0]["from"]
             user_text = messages[0]["text"]["body"]
 
-            # reply = ajay_reply(user_text)
-            reply = "Hello"
+            reply = ajay_reply(user_text)
+            # reply = "Hello"
 
             send_message(
                 to=from_number,
