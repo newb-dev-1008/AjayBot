@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import PlainTextResponse
 import requests
 import os
 from dotenv import load_dotenv
@@ -15,11 +16,24 @@ PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
 
 WHATSAPP_URL = f"https://graph.facebook.com/v18.0/{PHONE_NUMBER_ID}/messages"
 
+# @app.get("/webhook")
+# def verify(hub_mode: str, hub_challenge: str, hub_verify_token: str):
+#     if hub_verify_token == VERIFY_TOKEN:
+#         return int(hub_challenge)
+#     return "Verification failed"
+
 @app.get("/webhook")
-def verify(hub_mode: str, hub_challenge: str, hub_verify_token: str):
-    if hub_verify_token == VERIFY_TOKEN:
-        return int(hub_challenge)
-    return "Verification failed"
+async def verify_webhook(request: Request):
+    params = request.query_params
+
+    mode = params.get("hub.mode")
+    token = params.get("hub.verify_token")
+    challenge = params.get("hub.challenge")
+
+    if mode == "subscribe" and token == VERIFY_TOKEN:
+        return PlainTextResponse(challenge, status_code=200)
+
+    return PlainTextResponse("Forbidden", status_code=403)
 
 @app.post("/webhook")
 async def webhook(request: Request):
