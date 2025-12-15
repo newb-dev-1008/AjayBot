@@ -22,18 +22,18 @@ WHATSAPP_URL = f"https://graph.facebook.com/v18.0/{PHONE_NUMBER_ID}/messages"
 #         return int(hub_challenge)
 #     return "Verification failed"
 
-@app.get("/webhook")
-async def verify_webhook(request: Request):
-    params = request.query_params
-
-    mode = params.get("hub.mode")
-    token = params.get("hub.verify_token")
-    challenge = params.get("hub.challenge")
-
-    if mode == "subscribe" and token == VERIFY_TOKEN:
-        return PlainTextResponse(challenge, status_code=200)
-
-    return PlainTextResponse("Forbidden", status_code=403)
+# @app.get("/webhook")
+# async def verify_webhook(request: Request):
+#     params = request.query_params
+# 
+#     mode = params.get("hub.mode")
+#     token = params.get("hub.verify_token")
+#     challenge = params.get("hub.challenge")
+# 
+#     if mode == "subscribe" and token == VERIFY_TOKEN:
+#         return PlainTextResponse(challenge, status_code=200)
+# 
+#     return PlainTextResponse("Forbidden", status_code=403)
 
 # @app.post("/webhook")
 # async def webhook(request: Request):
@@ -61,12 +61,12 @@ async def verify_webhook(request: Request):
 # 
 #     return {"status": "ok"}
 
-def generate_ajay_reply(user_text: str) -> str:
-    return (
-        "Tumhe lagta hai main reply nahi karunga? 😏\n\n"
-        "Ajay hoon main. Bollywood villain energy ke saath.\n"
-        "Aur haan — tum khud ek gift ho."
-    )
+# def generate_ajay_reply(user_text: str) -> str:
+#     return (
+#         "Tumhe lagta hai main reply nahi karunga? 😏\n\n"
+#         "Ajay hoon main. Bollywood villain energy ke saath.\n"
+#         "Aur haan — tum khud ek gift ho."
+#     )
 
 def send_message(to, text):
     payload = {
@@ -95,10 +95,13 @@ async def handle_message(request: Request):
 
         if messages:
             from_number = messages[0]["from"]
+            user_text = messages[0]["text"]["body"]
+
+            reply = ajay_reply(user_text)
 
             send_message(
                 to=from_number,
-                text="Tum khud ek gift ho. Ajay hoon main — officially WhatsApp pe"
+                text=reply
             )
 
     except Exception as e:
